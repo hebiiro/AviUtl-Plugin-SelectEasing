@@ -31,6 +31,7 @@ END_MESSAGE_MAP()
 
 CMainFrame::CMainFrame() noexcept
 {
+	m_negative = FALSE;
 	m_left = TRUE;
 	m_alpha = 255;
 	m_scale = 100;
@@ -53,6 +54,7 @@ BOOL CMainFrame::loadSettings()
 	::GetModuleFileName(AfxGetInstanceHandle(), path, MAX_PATH);
 	::PathRenameExtension(path, _T(".ini"));
 
+	m_negative = ::GetPrivateProfileInt(_T("viewer"), _T("negative"), m_negative, path);
 	m_left = ::GetPrivateProfileInt(_T("viewer"), _T("left"), m_left, path);
 	m_alpha = ::GetPrivateProfileInt(_T("viewer"), _T("alpha"), m_alpha, path);
 	m_scale = ::GetPrivateProfileInt(_T("viewer"), _T("scale"), m_scale, path);
@@ -125,6 +127,8 @@ HWND CMainFrame::getTarget()
 
 int CMainFrame::getEasing()
 {
+	MY_TRACE(_T("CMainFrame::getEasing()\n"));
+
 	HWND target = ::GetForegroundWindow();
 	if (!target)
 		return -1;
@@ -140,17 +144,33 @@ int CMainFrame::getEasing()
 
 	TCHAR text[MAX_PATH] = {};
 	::SendMessage(child, WM_GETTEXT, _countof(text), (LPARAM)text);
-	return _ttoi(text) - 1;
+
+	int easing = _ttoi(text);
+	if (m_negative)
+		easing = -easing - 1;
+	else
+		easing = easing - 1;
+	MY_TRACE_NUM(easing);
+
+	return easing;
 }
 
 void CMainFrame::setEasing(int index)
 {
+	MY_TRACE(_T("CMainFrame::setEasing(%d)\n"), index);
+
 	HWND target = ::GetForegroundWindow();
 	if (!target)
 		return;
 
 	MY_TRACE_HWND(target);
-	MY_TRACE_NUM(index + 1);
+
+	int easing = index;
+	if (m_negative)
+		easing = -easing - 1;
+	else
+		easing = easing + 1;
+	MY_TRACE_NUM(easing);
 
 	HWND child = ::GetWindow(target, GW_CHILD);
 	if (!child)
@@ -160,7 +180,7 @@ void CMainFrame::setEasing(int index)
 	MY_TRACE_NUM(::GetDlgCtrlID(child));
 
 	TCHAR text[MAX_PATH] = {};
-	_itot_s(index + 1, text, 10);
+	_itot_s(easing, text, 10);
 	::SendMessage(child, WM_SETTEXT, 0, (LPARAM)text);
 	::PostMessage(target, WM_COMMAND, IDOK, 0);
 }

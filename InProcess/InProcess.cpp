@@ -31,15 +31,14 @@ BOOL CInProcessApp::dllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 			MY_TRACE(_T("DLL_PROCESS_ATTACH\n"));
 
 			m_instance = instance;
-
 			MY_TRACE_HEX(m_instance);
 
 			::GetModuleFileName(m_instance, m_name, MAX_PATH);
 			::PathStripPath(m_name);
 			::PathRemoveExtension(m_name);
-			::StringCbCopy(m_information, sizeof(m_information), _T("イージング選択 Version 1.0.0 by 蛇色"));
-
 			MY_TRACE_STR(m_name);
+
+			::StringCbCopy(m_information, sizeof(m_information), _T("イージング選択 Version 1.1.0 by 蛇色"));
 			MY_TRACE_STR(m_information);
 
 			break;

@@ -8,6 +8,7 @@ public:
 
 public:
 
+	BOOL m_negative;
 	BOOL m_left;
 	int m_alpha;
 	int m_scale;
