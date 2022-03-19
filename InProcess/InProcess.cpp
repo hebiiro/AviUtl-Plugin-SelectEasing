@@ -38,7 +38,7 @@ BOOL CInProcessApp::dllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 			::PathRemoveExtension(m_name);
 			MY_TRACE_STR(m_name);
 
-			::StringCbCopy(m_information, sizeof(m_information), _T("イージング選択 Version 1.1.0 by 蛇色"));
+			::StringCbCopy(m_information, sizeof(m_information), _T("イージング選択 Version 2.0.0 by 蛇色"));
 			MY_TRACE_STR(m_information);
 
 			break;

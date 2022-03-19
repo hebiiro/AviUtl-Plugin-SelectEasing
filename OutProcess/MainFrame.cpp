@@ -31,12 +31,21 @@ END_MESSAGE_MAP()
 
 CMainFrame::CMainFrame() noexcept
 {
+	m_imageVersion = 1;
 	m_negative = FALSE;
 	m_left = TRUE;
 	m_alpha = 255;
 	m_scale = 100;
 	m_x = 0;
 	m_y = 0;
+	m_selectedColorR = 0xff;
+	m_selectedColorG = 0x00;
+	m_selectedColorB = 0x00;
+	m_selectedColorA = 0x80;
+	m_hotColorR = 0x00;
+	m_hotColorG = 0xff;
+	m_hotColorB = 0x00;
+	m_hotColorA = 0x80;
 
 	m_currentPart = -1;
 	m_hotPart = -1;
@@ -54,12 +63,21 @@ BOOL CMainFrame::loadSettings()
 	::GetModuleFileName(AfxGetInstanceHandle(), path, MAX_PATH);
 	::PathRenameExtension(path, _T(".ini"));
 
+	m_imageVersion = ::GetPrivateProfileInt(_T("viewer"), _T("imageVersion"), m_imageVersion, path);
 	m_negative = ::GetPrivateProfileInt(_T("viewer"), _T("negative"), m_negative, path);
 	m_left = ::GetPrivateProfileInt(_T("viewer"), _T("left"), m_left, path);
 	m_alpha = ::GetPrivateProfileInt(_T("viewer"), _T("alpha"), m_alpha, path);
 	m_scale = ::GetPrivateProfileInt(_T("viewer"), _T("scale"), m_scale, path);
 	m_x = ::GetPrivateProfileInt(_T("viewer"), _T("x"), m_x, path);
 	m_y = ::GetPrivateProfileInt(_T("viewer"), _T("y"), m_y, path);
+	m_selectedColorR = ::GetPrivateProfileInt(_T("viewer"), _T("selectedColorR"), m_selectedColorR, path);
+	m_selectedColorG = ::GetPrivateProfileInt(_T("viewer"), _T("selectedColorG"), m_selectedColorG, path);
+	m_selectedColorB = ::GetPrivateProfileInt(_T("viewer"), _T("selectedColorB"), m_selectedColorB, path);
+	m_selectedColorA = ::GetPrivateProfileInt(_T("viewer"), _T("selectedColorA"), m_selectedColorA, path);
+	m_hotColorR = ::GetPrivateProfileInt(_T("viewer"), _T("hotColorR"), m_hotColorR, path);
+	m_hotColorG = ::GetPrivateProfileInt(_T("viewer"), _T("hotColorG"), m_hotColorG, path);
+	m_hotColorB = ::GetPrivateProfileInt(_T("viewer"), _T("hotColorB"), m_hotColorB, path);
+	m_hotColorA = ::GetPrivateProfileInt(_T("viewer"), _T("hotColorA"), m_hotColorA, path);
 
 	return TRUE;
 }
@@ -84,12 +102,31 @@ void CMainFrame::setRect(int number, int _x, int _y)
 {
 //	MY_TRACE(_T("CMainFrame::setRect(%d, %d, %d)\n"), number, _x, _y);
 
-	int x = ::MulDiv(_x, m_scale, 100);
-	int y = ::MulDiv(_y, m_scale, 100);
-	int w = ::MulDiv(_x + 121, m_scale, 100);
-	int h = ::MulDiv(_y + 101, m_scale, 100);
+	switch (m_imageVersion)
+	{
+	case 2:
+		{
+			int x = ::MulDiv(_x, m_scale, 100);
+			int y = ::MulDiv(_y, m_scale, 100);
+			int w = ::MulDiv(_x + 140, m_scale, 100);
+			int h = ::MulDiv(_y + 108, m_scale, 100);
 
-	m_parts[number - 1].SetRect(x, y, w, h);
+			m_parts[number - 1].SetRect(x, y, w, h);
+
+			break;
+		}
+	default:
+		{
+			int x = ::MulDiv(_x, m_scale, 100);
+			int y = ::MulDiv(_y, m_scale, 100);
+			int w = ::MulDiv(_x + 121, m_scale, 100);
+			int h = ::MulDiv(_y + 101, m_scale, 100);
+
+			m_parts[number - 1].SetRect(x, y, w, h);
+
+			break;
+		}
+	}
 }
 
 void CMainFrame::setHotPart(int index)
@@ -249,41 +286,90 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	TCHAR path[MAX_PATH] = {};
 	::GetModuleFileName(AfxGetInstanceHandle(), path, _countof(path));
 	::PathRemoveFileSpec(path);
-	::PathAppend(path, _T("easing.png"));
 
-	MY_TRACE_STR(path);
-
-	m_image.Load(path);
-
-	if (!m_image.IsNull())
+	switch (m_imageVersion)
 	{
-		int w = m_image.GetWidth() * m_scale / 100;
-		int h = m_image.GetHeight() * m_scale / 100;
-
-		MoveWindow(m_x, m_y, w, h);
-	}
-
-	m_parts.resize(41);
-
-	int x = 103;
-	int y = 40;
-
-	setRect(1, x, y);
-
-	for (int i = 0; i < 5; i++)
-	{
-		y += 178;
-
-		int x1 = 103;
-		int x2 = 649;
-
-		for (int j = 0; j < 4; j++)
+	case 2:
 		{
-			setRect((i * 8) + j + 2 + 0, x1, y);
-			setRect((i * 8) + j + 2 + 4, x2, y);
+			::PathAppend(path, _T("easing2.png"));
+			MY_TRACE_STR(path);
 
-			x1 += 125;
-			x2 += 125;
+			m_image.Load(path);
+
+			if (!m_image.IsNull())
+			{
+				int w = m_image.GetWidth() * m_scale / 100;
+				int h = m_image.GetHeight() * m_scale / 100;
+
+				MoveWindow(m_x, m_y, w, h);
+			}
+
+			m_parts.resize(41);
+
+			int x = 20;
+			int y = 98;
+
+			setRect(1, x, y);
+
+			for (int i = 0; i < 5; i++)
+			{
+				y += 155;
+
+				int x1 = 20;
+				int x2 = 695;
+
+				for (int j = 0; j < 4; j++)
+				{
+					setRect((i * 8) + j + 2 + 0, x1, y);
+					setRect((i * 8) + j + 2 + 4, x2, y);
+
+					x1 += 163;
+					x2 += 163;
+				}
+			}
+
+			break;
+		}
+	default:
+		{
+			::PathAppend(path, _T("easing.png"));
+			MY_TRACE_STR(path);
+
+			m_image.Load(path);
+
+			if (!m_image.IsNull())
+			{
+				int w = m_image.GetWidth() * m_scale / 100;
+				int h = m_image.GetHeight() * m_scale / 100;
+
+				MoveWindow(m_x, m_y, w, h);
+			}
+
+			m_parts.resize(41);
+
+			int x = 103;
+			int y = 40;
+
+			setRect(1, x, y);
+
+			for (int i = 0; i < 5; i++)
+			{
+				y += 178;
+
+				int x1 = 103;
+				int x2 = 649;
+
+				for (int j = 0; j < 4; j++)
+				{
+					setRect((i * 8) + j + 2 + 0, x1, y);
+					setRect((i * 8) + j + 2 + 4, x2, y);
+
+					x1 += 125;
+					x2 += 125;
+				}
+			}
+
+			break;
 		}
 	}
 
@@ -326,7 +412,7 @@ void CMainFrame::OnPaint()
 
 	if (m_currentPart >= 0 && m_currentPart < (int)m_parts.size())
 	{
-		SolidBrush brush(Color(0x80, 0xff, 0x00, 0xff));
+		SolidBrush brush(Color(m_selectedColorA, m_selectedColorR, m_selectedColorG, m_selectedColorB));
 		REAL x = (REAL)m_parts[m_currentPart].left;
 		REAL y = (REAL)m_parts[m_currentPart].top;
 		REAL w = (REAL)m_parts[m_currentPart].Width();
@@ -337,7 +423,7 @@ void CMainFrame::OnPaint()
 
 	if (m_hotPart >= 0 && m_hotPart < (int)m_parts.size())
 	{
-		SolidBrush brush(Color(0x80, 0xff, 0xff, 0xff));
+		SolidBrush brush(Color(m_hotColorA, m_hotColorR, m_hotColorG, m_hotColorB));
 		REAL x = (REAL)m_parts[m_hotPart].left;
 		REAL y = (REAL)m_parts[m_hotPart].top;
 		REAL w = (REAL)m_parts[m_hotPart].Width();

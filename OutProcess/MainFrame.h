@@ -8,11 +8,20 @@ public:
 
 public:
 
+	int m_imageVersion;
 	BOOL m_negative;
 	BOOL m_left;
 	int m_alpha;
 	int m_scale;
 	int m_x, m_y;
+	BYTE m_selectedColorR;
+	BYTE m_selectedColorG;
+	BYTE m_selectedColorB;
+	BYTE m_selectedColorA;
+	BYTE m_hotColorR;
+	BYTE m_hotColorG;
+	BYTE m_hotColorB;
+	BYTE m_hotColorA;
 	CImage m_image;
 	CParts m_parts;
 	int m_currentPart;
