@@ -18,6 +18,19 @@ BOOL WINAPI WritePrivateProfileInt(
 	return ::WritePrivateProfileString(lpAppName, lpKeyName, string, lpFileName);
 }
 
+CString GetPrivateProfileString(
+    _In_opt_ LPCTSTR lpAppName,
+    _In_opt_ LPCTSTR lpKeyName,
+    _In_opt_ LPCTSTR lpDefault,
+    _In_opt_ LPCTSTR lpFileName
+    )
+{
+	CString retValue;
+	::GetPrivateProfileString(lpAppName, lpKeyName, lpDefault, retValue.GetBuffer(MAX_PATH), MAX_PATH, lpFileName);
+	retValue.ReleaseBuffer();
+	return retValue;
+}
+
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
@@ -33,7 +46,9 @@ CMainFrame::CMainFrame() noexcept
 {
 	m_imageVersion = 1;
 	m_negative = FALSE;
-	m_left = TRUE;
+	m_clamp = FALSE;
+	m_horz = _T("left");
+	m_vert = _T("center");
 	m_alpha = 255;
 	m_scale = 100;
 	m_x = 0;
@@ -65,7 +80,9 @@ BOOL CMainFrame::loadSettings()
 
 	m_imageVersion = ::GetPrivateProfileInt(_T("viewer"), _T("imageVersion"), m_imageVersion, path);
 	m_negative = ::GetPrivateProfileInt(_T("viewer"), _T("negative"), m_negative, path);
-	m_left = ::GetPrivateProfileInt(_T("viewer"), _T("left"), m_left, path);
+	m_clamp = ::GetPrivateProfileInt(_T("viewer"), _T("clamp"), m_clamp, path);
+	m_horz = ::GetPrivateProfileString(_T("viewer"), _T("horz"), m_horz, path);
+	m_vert = ::GetPrivateProfileString(_T("viewer"), _T("vert"), m_vert, path);
 	m_alpha = ::GetPrivateProfileInt(_T("viewer"), _T("alpha"), m_alpha, path);
 	m_scale = ::GetPrivateProfileInt(_T("viewer"), _T("scale"), m_scale, path);
 	m_x = ::GetPrivateProfileInt(_T("viewer"), _T("x"), m_x, path);
@@ -235,15 +252,46 @@ void CMainFrame::show(HWND target)
 
 	int x, y;
 
-	if (m_left)
+	if (::lstrcmpi(m_horz, _T("left")) == 0)
 	{
 		x = rcTarget.left - rc.Width();
-		y = rcTarget.CenterPoint().y - rc.Height() / 2;
+	}
+	else if (::lstrcmpi(m_horz, _T("right")) == 0)
+	{
+		x = rcTarget.right;
 	}
 	else
 	{
-		x = rcTarget.right;
+		x = rcTarget.CenterPoint().x - rc.Width() / 2;
+	}
+
+	if (::lstrcmpi(m_vert, _T("top")) == 0)
+	{
+		y = rcTarget.top - rc.Height();
+	}
+	else if (::lstrcmpi(m_vert, _T("bottom")) == 0)
+	{
+		y = rcTarget.bottom;
+	}
+	else
+	{
 		y = rcTarget.CenterPoint().y - rc.Height() / 2;
+	}
+
+	if (m_clamp)
+	{
+		HMONITOR monitor = ::MonitorFromWindow(target, MONITOR_DEFAULTTONEAREST);
+		MONITORINFO mi = { sizeof(mi) }; ::GetMonitorInfo(monitor, &mi);
+
+		if (x < mi.rcWork.left)
+			x = mi.rcWork.left;
+		else if (x + rc.Width() > mi.rcWork.right)
+			x = mi.rcWork.right - rc.Width();
+
+		if (y < mi.rcWork.top)
+			y = mi.rcWork.top;
+		else if (y + rc.Height() > mi.rcWork.bottom)
+			y = mi.rcWork.bottom - rc.Height();
 	}
 
 	SetWindowPos(&wndTopMost, x, y, 0, 0,

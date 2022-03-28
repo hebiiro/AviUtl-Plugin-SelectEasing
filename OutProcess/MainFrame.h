@@ -10,7 +10,9 @@ public:
 
 	int m_imageVersion;
 	BOOL m_negative;
-	BOOL m_left;
+	BOOL m_clamp;
+	CString m_horz;
+	CString m_vert;
 	int m_alpha;
 	int m_scale;
 	int m_x, m_y;
