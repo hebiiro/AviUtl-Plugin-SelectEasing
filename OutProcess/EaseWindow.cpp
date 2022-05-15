@@ -8,12 +8,21 @@
 
 //--------------------------------------------------------------------
 
+inline int clamp(int n, int min, int max)
+{
+	if (n < min) return min;
+	if (n > max) return max;
+	return n;
+}
+
+//--------------------------------------------------------------------
+
 CEaseWindow::CEaseWindow()
 {
-	m_points[Points::first].x = Position::end;
-	m_points[Points::first].y = Position::start;
-	m_points[Points::second].x = Position::start;
-	m_points[Points::second].y = Position::end;
+	m_points[Points::first].x = Position::endBase;
+	m_points[Points::first].y = Position::startBase;
+	m_points[Points::second].x = Position::startBase;
+	m_points[Points::second].y = Position::endBase;
 	m_hot = Points::none;
 
 	m_enable = TRUE;
@@ -59,11 +68,11 @@ POINT CEaseWindow::LPToClient(POINT point, LPCRECT rc)
 {
 	int cw = rc->right - rc->left;
 	int ch = rc->bottom - rc->top;
-	int lw = Position::end - Position::start;
-	int lh = Position::end - Position::start;
+	int lw = Position::endX - Position::startX;
+	int lh = Position::endY - Position::startY;
 
-	double fx = (double)(point.x - Position::start) / lw;
-	double fy = (double)(point.y - Position::start) / lh;
+	double fx = (double)(point.x - Position::startX) / lw;
+	double fy = (double)(point.y - Position::startY) / lh;
 
 	fy = 1.0 - fy;
 
@@ -82,8 +91,8 @@ POINT CEaseWindow::ClientToLP(POINT point, LPCRECT rc)
 {
 	int cw = rc->right - rc->left;
 	int ch = rc->bottom - rc->top;
-	int lw = Position::end - Position::start;
-	int lh = Position::end - Position::start;
+	int lw = Position::endX - Position::startX;
+	int lh = Position::endY - Position::startY;
 
 	double fx = (double)(point.x - rc->left) / cw;
 	double fy = (double)(point.y - rc->top) / ch;
@@ -91,13 +100,11 @@ POINT CEaseWindow::ClientToLP(POINT point, LPCRECT rc)
 	fy = 1.0 - fy;
 
 	CPoint retValue(
-		Position::start + (int)round(lw * fx),
-		Position::start + (int)round(lh * fy));
+		Position::startX + (int)round(lw * fx),
+		Position::startY + (int)round(lh * fy));
 
-	retValue.x = max(retValue.x, Position::start);
-	retValue.x = min(retValue.x, Position::end);
-	retValue.y = max(retValue.y, Position::start);
-	retValue.y = min(retValue.y, Position::end);
+	retValue.x = clamp(retValue.x, Position::startX, Position::endX);
+	retValue.y = clamp(retValue.y, Position::startY, Position::endY);
 
 	return retValue;
 }
@@ -153,13 +160,13 @@ void CEaseWindow::receiveNumber()
 	::SendMessage(child, WM_GETTEXT, _countof(text), (LPARAM)text);
 	MY_TRACE_TSTR(text);
 
-	if (::lstrlen(text) != 8) return;
+	int n = _ttoi(text);
+	if (n < 0) return;
 
-	TCHAR buffer[3] = {};
-	memcpy(buffer, text + 0, sizeof(TCHAR) * 2); m_points[Points::first].x = _ttoi(buffer);
-	memcpy(buffer, text + 2, sizeof(TCHAR) * 2); m_points[Points::first].y = _ttoi(buffer);
-	memcpy(buffer, text + 4, sizeof(TCHAR) * 2); m_points[Points::second].x = _ttoi(buffer);
-	memcpy(buffer, text + 6, sizeof(TCHAR) * 2); m_points[Points::second].y = _ttoi(buffer);
+	m_points[Points::first].x  = clamp(n / 100 / 100 / 100 % 100, Position::startX, Position::endX);
+	m_points[Points::first].y  = clamp(n / 100 / 100 % 100, Position::startY, Position::endY);
+	m_points[Points::second].x = clamp(n / 100 % 100, Position::startX, Position::endX);
+	m_points[Points::second].y = clamp(n % 100, Position::startY, Position::endY);
 }
 
 void CEaseWindow::sendNumber()
@@ -342,22 +349,22 @@ void CEaseWindow::OnPaint()
 	CRect rcPaint = rc;
 	rcPaint.right--; rcPaint.bottom--;
 
+	MyPoint start(LPToClient(CPoint(Position::startBase, Position::startBase), &rcPaint));
+	MyPoint end(LPToClient(CPoint(Position::endBase, Position::endBase), &rcPaint));
+	MyPoint first(LPToClient(m_points[Points::first], &rcPaint));
+	MyPoint second(LPToClient(m_points[Points::second], &rcPaint));
+
 	{
 		// 外枠を描画する。
 
 		Pen pen(m_borderColor, m_borderWidth);
 		Rect rect;
-		rect.X = rcPaint.left;
-		rect.Y = rcPaint.top;
-		rect.Width = rcPaint.Width();
-		rect.Height = rcPaint.Height();
+		rect.X = start.X;
+		rect.Y = end.Y;
+		rect.Width = end.X - start.X;
+		rect.Height = start.Y - end.Y;
 		g.DrawRectangle(&pen, rect);
 	}
-
-	Point start(rcPaint.left, rcPaint.bottom);
-	Point end(rcPaint.right, rcPaint.top);
-	MyPoint first(LPToClient(m_points[Points::first], &rcPaint));
-	MyPoint second(LPToClient(m_points[Points::second], &rcPaint));
 
 	{
 		// ハンドルを描画する。

@@ -12,15 +12,17 @@ public:
 		static const int second= 1;
 		static const int maxSize = 2;
 		static const int none = -1;
-
-		static const int startPosition = 25;
-		static const int endPosition = 75;
 	};
 
 	struct Position
 	{
-		static const int start = 25;
-		static const int end = 75;
+		static const int startBase = 25;
+		static const int endBase = 75;
+
+		static const int startX = 25;
+		static const int startY = 0;
+		static const int endX = 75;
+		static const int endY = 99;
 	};
 
 	CPoint m_points[2];
