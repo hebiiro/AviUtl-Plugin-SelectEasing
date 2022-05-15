@@ -327,7 +327,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	if (!CFrameWnd::PreCreateWindow(cs))
 		return FALSE;
 
-	cs.style = WS_POPUP | WS_CAPTION | WS_SYSMENU | FWS_ADDTOTITLE;
+	cs.style = WS_POPUP | FWS_ADDTOTITLE;
 	cs.dwExStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOACTIVATE | WS_EX_LAYERED;
 	cs.lpszClass = AfxRegisterWndClass(0);
 
@@ -461,8 +461,7 @@ void CMainFrame::OnTimer(UINT_PTR timerId)
 
 BOOL CMainFrame::OnNcActivate(BOOL bActive)
 {
-	return FALSE;
-//	return CFrameWnd::OnNcActivate(bActive);
+	return CFrameWnd::OnNcActivate(bActive);
 }
 
 void CMainFrame::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)

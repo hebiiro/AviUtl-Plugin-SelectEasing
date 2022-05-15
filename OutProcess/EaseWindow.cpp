@@ -15,6 +15,16 @@ inline int clamp(int n, int min, int max)
 	return n;
 }
 
+inline double bezier(double p0, double p1, double p2, double p3, double t)
+{
+	double s = 1 - t;
+	return
+		1 * s * s * s * p0 +
+		3 * s * s * t * p1 +
+		3 * s * t * t * p2 +
+		1 * t * t * t * p3;
+}
+
 //--------------------------------------------------------------------
 
 CEaseWindow::CEaseWindow()
@@ -31,7 +41,7 @@ CEaseWindow::CEaseWindow()
 	m_horz = _T("left");
 	m_vert = _T("center");
 	m_alpha = 255;
-	m_margin = 32;
+	m_margin = 16;
 	m_hitDistance = 0;
 	m_windowSize.cx = 400;
 	m_windowSize.cy = 400;
@@ -40,12 +50,16 @@ CEaseWindow::CEaseWindow()
 	m_borderWidth = 4.0f;
 	m_curveColor = Color(255, 0, 0, 0);
 	m_curveWidth = 4.0f;
+	m_invalidCurveColor = Color(255, 255, 0, 0);
+	m_invalidCurveWidth = 4.0f;
 	m_handleColor = Color(255, 128, 192, 255);
 	m_handleWidth = 4.0f;
 	m_pointColor = Color(255, 0, 128, 255);
 	m_hotPointColor = Color(255, 224, 0, 0);
 	m_pointRadius = 16;
+	m_segmentCount = 100;
 	m_hideCursor = FALSE;
+
 }
 
 CEaseWindow::~CEaseWindow()
@@ -273,7 +287,8 @@ void CEaseWindow::show(HWND numberWindow, HWND easingWindow)
 	}
 
 	SetLayeredWindowAttributes(0, m_alpha, LWA_ALPHA);
-	SetWindowPos(&wndTopMost, x, y, w, h, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+	SetWindowPos(&wndTopMost, x, y, w, h, SWP_NOACTIVATE);
+	ShowWindow(SW_SHOWNA);
 	Invalidate(FALSE);
 }
 
@@ -299,8 +314,8 @@ BOOL CEaseWindow::PreCreateWindow(CREATESTRUCT& cs)
 {
 	MY_TRACE(_T("CEaseWindow::PreCreateWindow()\n"));
 
-	cs.style = WS_POPUP | WS_CAPTION | WS_THICKFRAME;
-	cs.dwExStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOACTIVATE | WS_EX_LAYERED;
+	cs.style = WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_SYSMENU;
+	cs.dwExStyle = WS_EX_TOPMOST | WS_EX_NOACTIVATE | WS_EX_LAYERED;
 	cs.lpszClass = AfxRegisterWndClass(
 		CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
 		::LoadCursor(0, IDC_ARROW));
@@ -312,6 +327,7 @@ BOOL CEaseWindow::PreCreateWindow(CREATESTRUCT& cs)
 }
 
 BEGIN_MESSAGE_MAP(CEaseWindow, CWnd)
+	ON_WM_CLOSE()
 	ON_WM_PAINT()
 	ON_WM_NCACTIVATE()
 	ON_WM_LBUTTONDOWN()
@@ -325,6 +341,13 @@ BEGIN_MESSAGE_MAP(CEaseWindow, CWnd)
 	ON_WM_CAPTURECHANGED()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
+
+void CEaseWindow::OnClose()
+{
+	sendNumber();
+
+//	CWnd::OnClose();
+}
 
 void CEaseWindow::OnPaint() 
 {
@@ -397,18 +420,48 @@ void CEaseWindow::OnPaint()
 		}
 	}
 
+	BOOL invalid = FALSE;
+
+	{
+		// ベジェ曲線が有効かチェックする。
+
+		double prev = start.X;
+
+		for (int i = 1; i < m_segmentCount; i++)
+		{
+			double t = (double)i / m_segmentCount;
+			double x = bezier(start.X, first.X, second.X, end.X, t);
+
+			if (x <= prev) // x が前回より小さかったら無効。
+			{
+				invalid = TRUE;
+				break;
+			}
+
+			prev = x;
+		}
+	}
+
 	{
 		// ベジェ曲線を描画する。
 
-		Pen pen(m_curveColor, m_curveWidth);
+		Color color = m_curveColor;
+		REAL width = m_curveWidth;
+
+		if (invalid)
+		{
+			color = m_invalidCurveColor;
+			width = m_invalidCurveWidth;
+		}
+
+		Pen pen(color, width);
 		g.DrawBezier(&pen, start, first, second, end);
 	}
 }
 
 BOOL CEaseWindow::OnNcActivate(BOOL bActive)
 {
-	return FALSE;
-//	return CWnd::OnNcActivate(bActive);
+	return CWnd::OnNcActivate(bActive);
 }
 
 void CEaseWindow::OnLButtonDown(UINT nFlags, CPoint point)
@@ -418,7 +471,7 @@ void CEaseWindow::OnLButtonDown(UINT nFlags, CPoint point)
 	m_hot = hitTest(point);
 	if (m_hot != Points::none)
 	{
-		// ドラッグを開始する。
+		MY_TRACE(_T("ドラッグを開始します\n"));
 
 		SetCapture();
 		if (m_hideCursor) ::ShowCursor(FALSE);
@@ -434,7 +487,7 @@ void CEaseWindow::OnLButtonUp(UINT nFlags, CPoint point)
 
 	if (GetCapture() == this)
 	{
-		// ドラッグを終了する。
+		MY_TRACE(_T("ドラッグを終了します\n"));
 
 		m_hot = Points::none;
 		ReleaseCapture();
@@ -447,8 +500,6 @@ void CEaseWindow::OnLButtonUp(UINT nFlags, CPoint point)
 void CEaseWindow::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	MY_TRACE(_T("CEaseWindow::OnLButtonDblClk(0x%08X, %d, %d)\n"), nFlags, point.x, point.y);
-
-	sendNumber();
 
 	CWnd::OnLButtonDblClk(nFlags, point);
 }

@@ -7,7 +7,7 @@
 EXTERN_C FILTER_DLL __declspec(dllexport) * __stdcall GetFilterTable(void)
 {
 	static TCHAR name[] = _T("イージング簡単選択");
-	static TCHAR information[] = _T("イージング簡単選択 4.1.0 by 蛇色");
+	static TCHAR information[] = _T("イージング簡単選択 4.2.0 by 蛇色");
 
 	static FILTER_DLL filter =
 	{

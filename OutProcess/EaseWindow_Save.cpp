@@ -25,6 +25,7 @@ HRESULT CEaseWindow::saveEase(const MSXML2::IXMLDOMElementPtr& element)
 	setPrivateProfileInt(easeElement, L"alpha", m_alpha);
 	setPrivateProfileInt(easeElement, L"margin", m_margin);
 	setPrivateProfileInt(easeElement, L"hitDistance", m_hitDistance);
+	setPrivateProfileInt(easeElement, L"segmentCount", m_segmentCount);
 	setPrivateProfileBool(easeElement, L"hideCursor", m_hideCursor);
 
 	{
@@ -52,6 +53,13 @@ HRESULT CEaseWindow::saveEase(const MSXML2::IXMLDOMElementPtr& element)
 
 		setPrivateProfileColor(curveElement, m_curveColor);
 		setPrivateProfileInt(curveElement, L"width", m_curveWidth);
+	}
+
+	{
+		MSXML2::IXMLDOMElementPtr invalidCurveElement = appendElement(easeElement, L"invalidCurve");
+
+		setPrivateProfileColor(invalidCurveElement, m_invalidCurveColor);
+		setPrivateProfileInt(invalidCurveElement, L"width", m_invalidCurveWidth);
 	}
 
 	{

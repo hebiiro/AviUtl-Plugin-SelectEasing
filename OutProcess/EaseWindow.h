@@ -19,9 +19,9 @@ public:
 		static const int startBase = 25;
 		static const int endBase = 75;
 
-		static const int startX = 25;
+		static const int startX = 0;
 		static const int startY = 0;
-		static const int endX = 75;
+		static const int endX = 99;
 		static const int endY = 99;
 	};
 
@@ -42,11 +42,14 @@ public:
 	REAL m_borderWidth;
 	Color m_curveColor;
 	REAL m_curveWidth;
+	Color m_invalidCurveColor;
+	REAL m_invalidCurveWidth;
 	Color m_handleColor;
 	REAL m_handleWidth;
 	Color m_pointColor;
 	Color m_hotPointColor;
 	int m_pointRadius;
+	int m_segmentCount;
 	BOOL m_hideCursor;
 
 	CEaseWindow();
@@ -71,6 +74,7 @@ public:
 	virtual BOOL Create(CWnd* parent);
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
+	afx_msg void OnClose();
 	afx_msg void OnPaint();
 	afx_msg BOOL OnNcActivate(BOOL bActive);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

@@ -28,6 +28,8 @@ HRESULT CEaseWindow::loadEase(const MSXML2::IXMLDOMElementPtr& element)
 		getPrivateProfileString(easeElement, L"horz", m_horz);
 		getPrivateProfileString(easeElement, L"vert", m_vert);
 		getPrivateProfileInt(easeElement, L"alpha", m_alpha);
+		getPrivateProfileInt(easeElement, L"segmentCount", m_segmentCount);
+		getPrivateProfileBool(easeElement, L"hideCursor", m_hideCursor);
 
 		{
 			// <window> を取得する。
@@ -77,6 +79,19 @@ HRESULT CEaseWindow::loadEase(const MSXML2::IXMLDOMElementPtr& element)
 
 				getPrivateProfileColor(curveElement, m_curveColor);
 				getPrivateProfileInt(curveElement, L"width", m_curveWidth);
+			}
+		}
+
+		{
+			// <invalidCurve> を取得する。
+			MSXML2::IXMLDOMNodeListPtr nodeList = easeElement->getElementsByTagName(L"invalidCurve");
+			int c = nodeList->length;
+			for (int i = 0; i < c; i++)
+			{
+				MSXML2::IXMLDOMElementPtr invalidCurveElement = nodeList->item[i];
+
+				getPrivateProfileColor(invalidCurveElement, m_invalidCurveColor);
+				getPrivateProfileInt(invalidCurveElement, L"width", m_invalidCurveWidth);
 			}
 		}
 
