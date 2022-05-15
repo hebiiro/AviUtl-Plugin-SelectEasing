@@ -4,5 +4,9 @@
 
 #define SELECT_EASING_CHECK_MAIN_PROCESS
 
-#include "Common/MyTracer.h"
-//#include "aulslib/memref2.h"
+#include "Common/Tracer.h"
+#include "Common/MSXML.h"
+#include "Common/Gdiplus.h"
+#include "Common/MFC.h"
+#include "Common/WinUtility.h"
+#include "Common/FileUpdateChecker.h"

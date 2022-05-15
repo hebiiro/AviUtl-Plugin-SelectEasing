@@ -7,12 +7,11 @@ CInProcessApp theApp;
 
 void ___outputLog(LPCTSTR text, LPCTSTR output)
 {
+	::OutputDebugString(output);
 }
 
 CInProcessApp::CInProcessApp()
 {
-	::ZeroMemory(m_name, sizeof(m_name));
-	::ZeroMemory(m_information, sizeof(m_information));
 	m_instance = 0;
 	m_hwnd = 0;
 	::ZeroMemory(&m_pi, sizeof(m_pi));
@@ -32,14 +31,6 @@ BOOL CInProcessApp::dllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 
 			m_instance = instance;
 			MY_TRACE_HEX(m_instance);
-
-			::GetModuleFileName(m_instance, m_name, MAX_PATH);
-			::PathStripPath(m_name);
-			::PathRemoveExtension(m_name);
-			MY_TRACE_STR(m_name);
-
-			::StringCbCopy(m_information, sizeof(m_information), _T("イージング選択 Version 3.0.0 by 蛇色"));
-			MY_TRACE_STR(m_information);
 
 			break;
 		}
@@ -120,21 +111,23 @@ BOOL CInProcessApp::createSubProcess()
 {
 	MY_TRACE(_T("CInProcessApp::createSubProcess()\n"));
 
+	TCHAR fileSpec[MAX_PATH] = {};
+	::GetModuleFileName(m_instance, fileSpec, MAX_PATH);
+	::PathStripPath(fileSpec);
+	MY_TRACE_TSTR(fileSpec);
+
 	TCHAR path[MAX_PATH] = {};
 	::GetModuleFileName(m_instance, path, MAX_PATH);
 	::PathRemoveExtension(path);
-	::PathAppend(path, m_name);
-	::PathAddExtension(path, _T(".exe"));
-
+	::PathAppend(path, fileSpec);
+	::PathRenameExtension(path, _T(".exe"));
 	MY_TRACE_STR(path);
 
 	TCHAR args[MAX_PATH] = {};
 	::StringCbPrintf(args, sizeof(args), _T("0x%08p"), m_hwnd);
-
 	MY_TRACE_STR(args);
 
 	STARTUPINFO si = { sizeof(si) };
-
 	if (!::CreateProcess(
 		path,           // No module name (use command line)
 		args,           // Command line

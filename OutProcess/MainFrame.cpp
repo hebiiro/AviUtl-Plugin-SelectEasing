@@ -6,61 +6,26 @@
 #define new DEBUG_NEW
 #endif
 
-BOOL WINAPI WritePrivateProfileInt(
-    _In_     LPCTSTR lpAppName,
-    _In_     LPCTSTR lpKeyName,
-    _In_     INT value,
-    _In_opt_ LPCTSTR lpFileName
-    )
-{
-	TCHAR string[MAX_PATH] = {};
-	_itot_s(value, string, 10);
-	return ::WritePrivateProfileString(lpAppName, lpKeyName, string, lpFileName);
-}
-
-CString GetPrivateProfileString(
-    _In_opt_ LPCTSTR lpAppName,
-    _In_opt_ LPCTSTR lpKeyName,
-    _In_opt_ LPCTSTR lpDefault,
-    _In_opt_ LPCTSTR lpFileName
-    )
-{
-	CString retValue;
-	::GetPrivateProfileString(lpAppName, lpKeyName, lpDefault, retValue.GetBuffer(MAX_PATH), MAX_PATH, lpFileName);
-	retValue.ReleaseBuffer();
-	return retValue;
-}
-
-BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
-	ON_WM_CREATE()
-	ON_WM_DESTROY()
-	ON_WM_PAINT()
-	ON_WM_TIMER()
-	ON_WM_NCACTIVATE()
-	ON_WM_NCCALCSIZE()
-	ON_WM_NCHITTEST()
-	ON_WM_LBUTTONDOWN()
-END_MESSAGE_MAP()
+//--------------------------------------------------------------------
 
 CMainFrame::CMainFrame() noexcept
 {
+	WCHAR fileName[MAX_PATH] = {};
+	::GetModuleFileNameW(AfxGetInstanceHandle(), fileName, MAX_PATH);
+	::PathRenameExtensionW(fileName, L".xml");
+	MY_TRACE_WSTR(fileName);
+
+	m_fileUpdateChecker.init(fileName);
+	m_isSettingsFileLoaded = FALSE;
+
 	m_imageVersion = 1;
-	m_negative = FALSE;
 	m_clamp = FALSE;
 	m_horz = _T("left");
 	m_vert = _T("center");
 	m_alpha = 255;
 	m_scale = 100;
-	m_x = 0;
-	m_y = 0;
-	m_selectedColorR = 0xff;
-	m_selectedColorG = 0x00;
-	m_selectedColorB = 0x00;
-	m_selectedColorA = 0x80;
-	m_hotColorR = 0x00;
-	m_hotColorG = 0xff;
-	m_hotColorB = 0x00;
-	m_hotColorA = 0x80;
+	m_selectedColor = Color(0x80, 0xff, 0x00, 0x00);
+	m_hotColor = Color(0x80, 0x00, 0xff, 0x00);
 
 	m_currentPart = -1;
 	m_hotPart = -1;
@@ -70,49 +35,104 @@ CMainFrame::~CMainFrame()
 {
 }
 
-BOOL CMainFrame::loadSettings()
+void CMainFrame::loadImage()
 {
-	MY_TRACE(_T("CMainFrame::loadSettings()\n"));
+	MY_TRACE(_T("CMainFrame::loadImage()\n"));
 
-	TCHAR path[MAX_PATH];
-	::GetModuleFileName(AfxGetInstanceHandle(), path, MAX_PATH);
-	::PathRenameExtension(path, _T(".ini"));
+	if (!m_image.IsNull()) m_image.Destroy();
+	m_parts.clear();
 
-	m_imageVersion = ::GetPrivateProfileInt(_T("viewer"), _T("imageVersion"), m_imageVersion, path);
-	m_negative = ::GetPrivateProfileInt(_T("viewer"), _T("negative"), m_negative, path);
-	m_clamp = ::GetPrivateProfileInt(_T("viewer"), _T("clamp"), m_clamp, path);
-	m_horz = ::GetPrivateProfileString(_T("viewer"), _T("horz"), m_horz, path);
-	m_vert = ::GetPrivateProfileString(_T("viewer"), _T("vert"), m_vert, path);
-	m_alpha = ::GetPrivateProfileInt(_T("viewer"), _T("alpha"), m_alpha, path);
-	m_scale = ::GetPrivateProfileInt(_T("viewer"), _T("scale"), m_scale, path);
-	m_x = ::GetPrivateProfileInt(_T("viewer"), _T("x"), m_x, path);
-	m_y = ::GetPrivateProfileInt(_T("viewer"), _T("y"), m_y, path);
-	m_selectedColorR = ::GetPrivateProfileInt(_T("viewer"), _T("selectedColorR"), m_selectedColorR, path);
-	m_selectedColorG = ::GetPrivateProfileInt(_T("viewer"), _T("selectedColorG"), m_selectedColorG, path);
-	m_selectedColorB = ::GetPrivateProfileInt(_T("viewer"), _T("selectedColorB"), m_selectedColorB, path);
-	m_selectedColorA = ::GetPrivateProfileInt(_T("viewer"), _T("selectedColorA"), m_selectedColorA, path);
-	m_hotColorR = ::GetPrivateProfileInt(_T("viewer"), _T("hotColorR"), m_hotColorR, path);
-	m_hotColorG = ::GetPrivateProfileInt(_T("viewer"), _T("hotColorG"), m_hotColorG, path);
-	m_hotColorB = ::GetPrivateProfileInt(_T("viewer"), _T("hotColorB"), m_hotColorB, path);
-	m_hotColorA = ::GetPrivateProfileInt(_T("viewer"), _T("hotColorA"), m_hotColorA, path);
+	TCHAR path[MAX_PATH] = {};
+	::GetModuleFileName(AfxGetInstanceHandle(), path, _countof(path));
+	::PathRemoveFileSpec(path);
 
-	return TRUE;
-}
+	switch (m_imageVersion)
+	{
+	case 2:
+		{
+			::PathAppend(path, _T("easing2.png"));
+			MY_TRACE_TSTR(path);
 
-BOOL CMainFrame::saveSettings()
-{
-	MY_TRACE(_T("CMainFrame::saveSettings()\n"));
+			m_image.Load(path);
 
-	TCHAR path[MAX_PATH];
-	::GetModuleFileName(AfxGetInstanceHandle(), path, MAX_PATH);
-	::PathRenameExtension(path, _T(".ini"));
+			if (!m_image.IsNull())
+			{
+				int w = m_image.GetWidth() * m_scale / 100;
+				int h = m_image.GetHeight() * m_scale / 100;
 
-	CRect rc; GetWindowRect(&rc);
+				SetWindowPos(0, 0, 0, w, h,
+					SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+			}
 
-	::WritePrivateProfileInt(_T("viewer"), _T("x"), rc.left, path);
-	::WritePrivateProfileInt(_T("viewer"), _T("y"), rc.top, path);
+			m_parts.resize(41);
 
-	return TRUE;
+			int x = 20;
+			int y = 98;
+
+			setRect(1, x, y);
+
+			for (int i = 0; i < 5; i++)
+			{
+				y += 155;
+
+				int x1 = 20;
+				int x2 = 695;
+
+				for (int j = 0; j < 4; j++)
+				{
+					setRect((i * 8) + j + 2 + 0, x1, y);
+					setRect((i * 8) + j + 2 + 4, x2, y);
+
+					x1 += 163;
+					x2 += 163;
+				}
+			}
+
+			break;
+		}
+	default:
+		{
+			::PathAppend(path, _T("easing.png"));
+			MY_TRACE_TSTR(path);
+
+			m_image.Load(path);
+
+			if (!m_image.IsNull())
+			{
+				int w = m_image.GetWidth() * m_scale / 100;
+				int h = m_image.GetHeight() * m_scale / 100;
+
+				SetWindowPos(0, 0, 0, w, h,
+					SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+			}
+
+			m_parts.resize(41);
+
+			int x = 103;
+			int y = 40;
+
+			setRect(1, x, y);
+
+			for (int i = 0; i < 5; i++)
+			{
+				y += 178;
+
+				int x1 = 103;
+				int x2 = 649;
+
+				for (int j = 0; j < 4; j++)
+				{
+					setRect((i * 8) + j + 2 + 0, x1, y);
+					setRect((i * 8) + j + 2 + 4, x2, y);
+
+					x1 += 125;
+					x2 += 125;
+				}
+			}
+
+			break;
+		}
+	}
 }
 
 void CMainFrame::setRect(int number, int _x, int _y)
@@ -171,7 +191,7 @@ HWND CMainFrame::getTarget()
 	TCHAR text[MAX_PATH];
 	::GetWindowText(hwnd, text, _countof(text));
 
-//	MY_TRACE_STR(text);
+//	MY_TRACE_TSTR(text);
 
 	if (::lstrcmp(text, _T("移動フレーム間隔")) != 0)
 		return 0;
@@ -184,27 +204,23 @@ int CMainFrame::getEasing()
 	MY_TRACE(_T("CMainFrame::getEasing()\n"));
 
 	HWND target = ::GetForegroundWindow();
-	if (!target)
-		return -1;
-
+	if (!target) return -1;
 	MY_TRACE_HWND(target);
 
 	HWND child = ::GetWindow(target, GW_CHILD);
-	if (!child)
-		return -1;
-
+	if (!child) return -1;
 	MY_TRACE_HWND(child);
-	MY_TRACE_NUM(::GetDlgCtrlID(child));
+	MY_TRACE_INT(::GetDlgCtrlID(child));
 
 	TCHAR text[MAX_PATH] = {};
 	::SendMessage(child, WM_GETTEXT, _countof(text), (LPARAM)text);
 
 	int easing = _ttoi(text);
-	if (m_negative)
+	if (m_easeWindow.m_enable)
 		easing = -easing - 1;
 	else
 		easing = easing - 1;
-	MY_TRACE_NUM(easing);
+	MY_TRACE_INT(easing);
 
 	return easing;
 }
@@ -214,24 +230,20 @@ void CMainFrame::setEasing(int index)
 	MY_TRACE(_T("CMainFrame::setEasing(%d)\n"), index);
 
 	HWND target = ::GetForegroundWindow();
-	if (!target)
-		return;
-
+	if (!target) return;
 	MY_TRACE_HWND(target);
 
 	int easing = index;
-	if (m_negative)
+	if (m_easeWindow.m_enable)
 		easing = -easing - 1;
 	else
 		easing = easing + 1;
-	MY_TRACE_NUM(easing);
+	MY_TRACE_INT(easing);
 
 	HWND child = ::GetWindow(target, GW_CHILD);
-	if (!child)
-		return;
-
+	if (!child) return;
 	MY_TRACE_HWND(child);
-	MY_TRACE_NUM(::GetDlgCtrlID(child));
+	MY_TRACE_INT(::GetDlgCtrlID(child));
 
 	TCHAR text[MAX_PATH] = {};
 	_itot_s(easing, text, 10);
@@ -294,6 +306,7 @@ void CMainFrame::show(HWND target)
 			y = mi.rcWork.bottom - rc.Height();
 	}
 
+	SetLayeredWindowAttributes(0, m_alpha, LWA_ALPHA);
 	SetWindowPos(&wndTopMost, x, y, 0, 0,
 		SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 	Invalidate(FALSE);
@@ -307,6 +320,8 @@ void CMainFrame::hide()
 	ShowWindow(SW_HIDE);
 }
 
+//--------------------------------------------------------------------
+
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if (!CFrameWnd::PreCreateWindow(cs))
@@ -319,6 +334,17 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	return TRUE;
 }
 
+BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
+	ON_WM_CREATE()
+	ON_WM_DESTROY()
+	ON_WM_PAINT()
+	ON_WM_TIMER()
+	ON_WM_NCACTIVATE()
+	ON_WM_NCCALCSIZE()
+	ON_WM_NCHITTEST()
+	ON_WM_LBUTTONDOWN()
+END_MESSAGE_MAP()
+
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	MY_TRACE(_T("CMainFrame::OnCreate()\n"));
@@ -326,99 +352,16 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!loadSettings())
-		return -1;
-
-	SetLayeredWindowAttributes(0, m_alpha, LWA_ALPHA);
-
-	TCHAR path[MAX_PATH] = {};
-	::GetModuleFileName(AfxGetInstanceHandle(), path, _countof(path));
-	::PathRemoveFileSpec(path);
-
-	switch (m_imageVersion)
+	if (!m_easeWindow.Create(this))
 	{
-	case 2:
-		{
-			::PathAppend(path, _T("easing2.png"));
-			MY_TRACE_STR(path);
+		AfxMessageBox(_T("EaseWindow の作成に失敗しました\n"));
+		return -1;
+	}
 
-			m_image.Load(path);
-
-			if (!m_image.IsNull())
-			{
-				int w = m_image.GetWidth() * m_scale / 100;
-				int h = m_image.GetHeight() * m_scale / 100;
-
-				MoveWindow(m_x, m_y, w, h);
-			}
-
-			m_parts.resize(41);
-
-			int x = 20;
-			int y = 98;
-
-			setRect(1, x, y);
-
-			for (int i = 0; i < 5; i++)
-			{
-				y += 155;
-
-				int x1 = 20;
-				int x2 = 695;
-
-				for (int j = 0; j < 4; j++)
-				{
-					setRect((i * 8) + j + 2 + 0, x1, y);
-					setRect((i * 8) + j + 2 + 4, x2, y);
-
-					x1 += 163;
-					x2 += 163;
-				}
-			}
-
-			break;
-		}
-	default:
-		{
-			::PathAppend(path, _T("easing.png"));
-			MY_TRACE_STR(path);
-
-			m_image.Load(path);
-
-			if (!m_image.IsNull())
-			{
-				int w = m_image.GetWidth() * m_scale / 100;
-				int h = m_image.GetHeight() * m_scale / 100;
-
-				MoveWindow(m_x, m_y, w, h);
-			}
-
-			m_parts.resize(41);
-
-			int x = 103;
-			int y = 40;
-
-			setRect(1, x, y);
-
-			for (int i = 0; i < 5; i++)
-			{
-				y += 178;
-
-				int x1 = 103;
-				int x2 = 649;
-
-				for (int j = 0; j < 4; j++)
-				{
-					setRect((i * 8) + j + 2 + 0, x1, y);
-					setRect((i * 8) + j + 2 + 4, x2, y);
-
-					x1 += 125;
-					x2 += 125;
-				}
-			}
-
-			break;
-		}
+	if (loadSettings() != S_OK)
+	{
+		AfxMessageBox(_T("設定ファイルの読み込みに失敗しました\n"));
+		return -1;
 	}
 
 	SetTimer(TIMER_ID, 1000, 0);
@@ -441,7 +384,11 @@ void CMainFrame::OnDestroy()
 
 void CMainFrame::OnPaint()
 {
-	CPaintDC dc(this);
+	CPaintDC paintDC(this);
+
+	CUxDC dc(paintDC);
+	if (!dc.isValid()) return;
+
 	CRect rc; GetClientRect(&rc);
 
 	if (!m_image.IsNull())
@@ -460,7 +407,7 @@ void CMainFrame::OnPaint()
 
 	if (m_currentPart >= 0 && m_currentPart < (int)m_parts.size())
 	{
-		SolidBrush brush(Color(m_selectedColorA, m_selectedColorR, m_selectedColorG, m_selectedColorB));
+		SolidBrush brush(m_selectedColor);
 		REAL x = (REAL)m_parts[m_currentPart].left;
 		REAL y = (REAL)m_parts[m_currentPart].top;
 		REAL w = (REAL)m_parts[m_currentPart].Width();
@@ -471,7 +418,7 @@ void CMainFrame::OnPaint()
 
 	if (m_hotPart >= 0 && m_hotPart < (int)m_parts.size())
 	{
-		SolidBrush brush(Color(m_hotColorA, m_hotColorR, m_hotColorG, m_hotColorB));
+		SolidBrush brush(m_hotColor);
 		REAL x = (REAL)m_parts[m_hotPart].left;
 		REAL y = (REAL)m_parts[m_hotPart].top;
 		REAL w = (REAL)m_parts[m_hotPart].Width();
@@ -497,11 +444,16 @@ void CMainFrame::OnTimer(UINT_PTR timerId)
 		if (target)
 		{
 			show(target);
+			m_easeWindow.show(target, GetSafeHwnd());
 		}
 		else
 		{
+			m_easeWindow.hide();
 			hide();
 		}
+
+		if (m_fileUpdateChecker.isFileUpdated())
+			loadSettings();
 	}
 
 	CFrameWnd::OnTimer(timerId);
@@ -550,3 +502,5 @@ void CMainFrame::OnLButtonDown(UINT nFlags, CPoint point)
 
 	CFrameWnd::OnLButtonDown(nFlags, point);
 }
+
+//--------------------------------------------------------------------

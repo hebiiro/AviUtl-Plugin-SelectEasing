@@ -4,9 +4,6 @@ class CInProcessApp
 {
 public:
 
-	TCHAR m_name[MAX_PATH];
-	TCHAR m_information[MAX_PATH];
-
 	HINSTANCE m_instance;
 	HWND m_hwnd;
 	PROCESS_INFORMATION m_pi;

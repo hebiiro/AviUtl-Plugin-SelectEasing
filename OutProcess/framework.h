@@ -30,5 +30,8 @@ using namespace Gdiplus;
 #include <tchar.h>
 #include <strsafe.h>
 
-#include <vector>
 #include <memory>
+#include <vector>
+#include <list>
+
+#import <msxml3.dll>

@@ -95,15 +95,16 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>../;../../AviUtl/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;../../;../../AviUtl/aviutl_exedit_sdk/</AdditionalIncludeDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>InProcess.def</ModuleDefinitionFile>
-      <AdditionalLibraryDirectories>../</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\AviUtl110_test\Plugins\SelectEasing.auf"</Command>
@@ -119,8 +120,9 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>../;../../AviUtl/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;../../;../../AviUtl/aviutl_exedit_sdk/</AdditionalIncludeDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -129,7 +131,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>InProcess.def</ModuleDefinitionFile>
-      <AdditionalLibraryDirectories>../</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\AviUtl110_test\Plugins\SelectEasing.auf"</Command>
@@ -143,15 +145,16 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>../;../../AviUtl/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;../../;../../AviUtl/aviutl_exedit_sdk/</AdditionalIncludeDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>InProcess.def</ModuleDefinitionFile>
-      <AdditionalLibraryDirectories>../</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\AviUtl110_test\Plugins\SelectEasing.auf"</Command>
@@ -167,8 +170,9 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>../;../../AviUtl/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;../../;../../AviUtl/aviutl_exedit_sdk/</AdditionalIncludeDirectories>
       <StructMemberAlignment>Default</StructMemberAlignment>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -177,14 +181,14 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>InProcess.def</ModuleDefinitionFile>
-      <AdditionalLibraryDirectories>../</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\AviUtl110_test\Plugins\SelectEasing.auf"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Common\MyTracer.h" />
+    <ClInclude Include="..\..\Common\Tracer.h" />
     <ClInclude Include="InProcess.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />

@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "OutProcess.h"
 #include "MainFrame.h"
-#include "Common/MyTracer2.h"
+#include "Common/Tracer2.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -44,19 +44,22 @@ BOOL COutProcessApp::InitInstance()
 
 	CWinApp::InitInstance();
 
+	if (!AfxOleInit())
+		return -1;
+
 	EnableTaskbarInteraction(FALSE);
 
 	CFrameWnd* pFrame = new CMainFrame;
 	m_pMainWnd = pFrame;
 	pFrame->LoadFrame(IDR_MAINFRAME, 0, nullptr, nullptr);
-//	pFrame->ShowWindow(SW_SHOW);
-//	pFrame->UpdateWindow();
 
 	return TRUE;
 }
 
 int COutProcessApp::ExitInstance()
 {
+	AfxOleTerm(FALSE);
+
 	return CWinApp::ExitInstance();
 }
 
@@ -82,7 +85,6 @@ int COutProcessApp::Run()
 void COutProcessApp::OnSelectEasingNotify(WPARAM wParam, LPARAM lParam)
 {
 	MY_TRACE(_T("COutProcessApp::OnSelectEasingNotify(0x%08X, 0x%08X)\n"), wParam, lParam);
-
 #if 1
 	m_pMainWnd->PostMessageA(WM_TIMER, TIMER_ID, 0);
 #else

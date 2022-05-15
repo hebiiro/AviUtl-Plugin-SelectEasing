@@ -2,38 +2,38 @@
 #include "InProcess.h"
 
 //---------------------------------------------------------------------
-//		フィルタ構造体定義
-//---------------------------------------------------------------------
-FILTER_DLL g_filter =
-{
-//	FILTER_FLAG_NO_CONFIG |
-	FILTER_FLAG_ALWAYS_ACTIVE |
-	FILTER_FLAG_DISP_FILTER |
-	FILTER_FLAG_EX_INFORMATION,
-	0, 0,
-	theApp.m_name,
-	NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL,
-	func_proc,
-	func_init,
-	func_exit,
-	NULL,
-	func_WndProc,
-	NULL, NULL,
-	NULL,
-	NULL,
-	theApp.m_information,
-	NULL, NULL,
-	NULL, NULL, NULL, NULL,
-	NULL,
-};
-
-//---------------------------------------------------------------------
 //		フィルタ構造体のポインタを渡す関数
 //---------------------------------------------------------------------
 EXTERN_C FILTER_DLL __declspec(dllexport) * __stdcall GetFilterTable(void)
 {
-	return &g_filter;
+	static TCHAR name[] = _T("イージング簡単選択");
+	static TCHAR information[] = _T("イージング簡単選択 4.0.0 by 蛇色");
+
+	static FILTER_DLL filter =
+	{
+	//	FILTER_FLAG_NO_CONFIG |
+		FILTER_FLAG_ALWAYS_ACTIVE |
+		FILTER_FLAG_DISP_FILTER |
+		FILTER_FLAG_EX_INFORMATION,
+		0, 0,
+		name,
+		NULL, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL,
+		func_proc,
+		func_init,
+		func_exit,
+		NULL,
+		func_WndProc,
+		NULL, NULL,
+		NULL,
+		NULL,
+		information,
+		NULL, NULL,
+		NULL, NULL, NULL, NULL,
+		NULL,
+	};
+
+	return &filter;
 }
 
 //---------------------------------------------------------------------

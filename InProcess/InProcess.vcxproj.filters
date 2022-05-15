@@ -8,10 +8,10 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="..\Common\MyTracer.h">
+    <ClInclude Include="InProcess.h" />
+    <ClInclude Include="..\..\Common\Tracer.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="InProcess.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

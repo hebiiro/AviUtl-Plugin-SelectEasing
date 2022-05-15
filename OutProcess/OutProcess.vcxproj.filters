@@ -13,22 +13,55 @@
     <ClInclude Include="Resource.h">
       <Filter>リソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\MyTracer.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="OutProcess.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="..\Common\MyTracer2.h">
+    <ClInclude Include="..\..\Common\AviUtlInternal.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Common\Dialog.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\FileUpdateChecker.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Gdiplus.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Hook.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\MFC.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\MSXML.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Profile.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Tracer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Tracer2.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\WinUtility.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="EaseWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="OutProcess.cpp" />
+    <ClCompile Include="MainFrame_Save.cpp" />
+    <ClCompile Include="EaseWindow.cpp" />
+    <ClCompile Include="EaseWindow_Save.cpp" />
+    <ClCompile Include="MainFrame_Load.cpp" />
+    <ClCompile Include="EaseWindow_Load.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="OutProcess.rc">

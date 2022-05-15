@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+#include "EaseWindow.h"
+
+//--------------------------------------------------------------------
+
 class CMainFrame : public CFrameWnd
 {
 public:
@@ -8,22 +12,19 @@ public:
 
 public:
 
+	CEaseWindow m_easeWindow;
+
+	FileUpdateChecker m_fileUpdateChecker;
+	BOOL m_isSettingsFileLoaded;
+
 	int m_imageVersion;
-	BOOL m_negative;
 	BOOL m_clamp;
-	CString m_horz;
-	CString m_vert;
+	_bstr_t m_horz;
+	_bstr_t m_vert;
 	int m_alpha;
 	int m_scale;
-	int m_x, m_y;
-	BYTE m_selectedColorR;
-	BYTE m_selectedColorG;
-	BYTE m_selectedColorB;
-	BYTE m_selectedColorA;
-	BYTE m_hotColorR;
-	BYTE m_hotColorG;
-	BYTE m_hotColorB;
-	BYTE m_hotColorA;
+	Color m_selectedColor;
+	Color m_hotColor;
 	CImage m_image;
 	CParts m_parts;
 	int m_currentPart;
@@ -34,8 +35,11 @@ public:
 	CMainFrame() noexcept;
 	virtual ~CMainFrame();
 
-	BOOL loadSettings();
-	BOOL saveSettings();
+	HRESULT loadSettings();
+	HRESULT loadEasing(const MSXML2::IXMLDOMElementPtr& element);
+	HRESULT saveSettings();
+	HRESULT saveEasing(const MSXML2::IXMLDOMElementPtr& element);
+	void loadImage();
 	void setRect(int number, int x, int y);
 	void setHotPart(int index);
 	HWND getTarget();
@@ -56,3 +60,5 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	DECLARE_MESSAGE_MAP()
 };
+
+//--------------------------------------------------------------------

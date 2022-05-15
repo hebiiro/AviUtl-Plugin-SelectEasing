@@ -1,11 +1,22 @@
-﻿# AviUtl プラグイン - イージング選択
+﻿# AviUtl プラグイン - イージング簡単選択
 
-* version 3.0.0 by 蛇色 - 2022/03/19 clamp、horz、vert オプションを追加
-* version 2.0.0 by 蛇色 - 2022/03/19 画像を選択できるように修正
-* version 1.1.0 by 蛇色 - 2022/03/18 負数も使えるように修正
-* version 1.0.0 by 蛇色 - 2022/03/18 初版
+* 4.0.0 - 2022/05/15 「ease」のベジェ曲線に対応
+* 3.0.0 - 2022/03/19 clamp、horz、vert オプションを追加
+* 2.0.0 - 2022/03/19 画像を選択できるように修正
+* 1.1.0 - 2022/03/18 負数も使えるように修正
+* 1.0.0 - 2022/03/18 初版
 
-イージング番号を GUI で選択します。
+イージング番号を GUI で選択できるようにします。
+
+## 免責事項
+
+このプラグインおよび同梱物を使用したことによって生じたすべての障害・損害・不具合等に関しては、私と私の関係者および私の所属するいかなる団体・組織とも、一切の責任を負いません。各自の責任においてご使用ください。
+
+## ダウンロード
+
+1. ページ右側にある [Releases](/../../releases) をクリックして移動します。
+2. ダウンロードしたいバージョンをクリックして移動します。
+3. Assets の下に圧縮ファイルがあるのでクリックしてダウンロードします。
 
 ## 導入方法
 
@@ -20,28 +31,48 @@
 
 ## 設定方法
 
-SelectEasing.ini をテキストエディタで編集してから AviUtl を起動します。
+SelectEasing フォルダ内の SelectEasing.xml をテキストエディタで編集します。AviUtl 起動中でも変更が反映されます。
 
-```ini
-[viewer]
-imageVersion=2 ; 画像のバージョンを指定します。
-negative=0 ; 1 の場合は負数になります。例えばイージング番号 41 を選択すると数値は -41 になります。
-clamp=1 ; 1 の場合は画像がモニターからはみ出ないように表示位置を調整します。
-horz=left ; left の場合はダイアログの左側に画像を表示します。right の場合は右側に表示します。それ以外の場合は中央に表示します。
-vert=center ; top の場合はダイアログの上側に画像を表示します。bottom の場合は下側に表示します。それ以外の場合は中央に表示します。
-alpha=255 ; 画像のアルファ値を指定します。
-scale=100 ; 画像の表示倍率を指定します。
-selectedColorR=0xff ; 選択状態の色を指定します。
-selectedColorG=0x00
-selectedColorB=0xff
-selectedColorA=0x66
-hotColorR=0xff ; ホット状態の色を指定します。
-hotColorG=0xff
-hotColorB=0x00
-hotColorA=0x66
-```
+* ```<easing>```
+	* ```imageVersion``` 画像のバージョンを指定します。
+	* ```clamp``` YES の場合は画像がモニターからはみ出ないように表示位置を調整します。
+	* ```horz``` left の場合はダイアログの左側に画像を表示します。right の場合は右側に表示します。それ以外の場合は中央に表示します。
+	* ```vert``` top の場合はダイアログの上側に画像を表示します。bottom の場合は下側に表示します。それ以外の場合は中央に表示します。
+	* ```alpha``` 画像のアルファ値を指定します。
+	* ```scale``` 画像の表示倍率を指定します。
+	* ```<selected>``` 選択状態の色を指定します。
+	* ```<hot>``` ホット状態の色を指定します。
+* ```<ease>```
+	* ```enable``` YES を指定すると数値が負数になります。例えばイージング番号 41 を選択すると数値は -41 になります。さらにベジェ曲線を編集するウィンドウが表示されます。
+	* ```origin``` ウィンドウを表示する基準を指定します。number を指定すると数値入力ダイアログが基準になります。easing を指定するとイージング画像ウィンドウが基準になります。
+	* ```clamp``` YES の場合は画像がモニターからはみ出ないように表示位置を調整します。
+	* ```horz``` left の場合は origin の左側に画像を表示します。right の場合は右側に表示します。それ以外の場合は中央に表示します。
+	* ```vert``` top の場合は origin の上側に画像を表示します。bottom の場合は下側に表示します。それ以外の場合は中央に表示します。
+	* ```alpha``` ウィンドウのアルファ値を指定します。
+	* ```margin``` 外枠までのマージンを指定します。
+	* ```hitDistance``` 追加の当たり判定範囲を指定します。描画を小さくすると当たり判定も小さくなるので、その場合はこの値を大きくします。
+	* ```hideCursor``` YES を指定するとドラッグ時にマウスカーソルを非表示にします。
+	* ```<window>``` ウィンドウのクライアント領域のサイズを指定します。
+	* ```<background>``` 背景色を指定します。
+	* ```<border>``` 外枠の色と太さを指定します。
+	* ```<curve>``` ベジェ曲線の色と太さを指定します。
+	* ```<handle>``` ベジェハンドルの色と太さを指定します。
+	* ```<point>``` 制御点の色と半径を指定します。
+	* ```<hotPoint>``` ホット状態の制御点の色を指定します。
 
 ## 動作確認
 
 * (必須) AviUtl 1.10 & 拡張編集 0.92 http://spring-fragrance.mints.ne.jp/aviutl/
-* (共存確認) patch.aul r14 https://www.nicovideo.jp/watch/sm40087155
+* (必須) patch.aul r21 https://scrapbox.io/ePi5131/patch.aul
+
+## クレジット
+
+* Microsoft Research Detours Package https://github.com/microsoft/Detours
+* aviutl_exedit_sdk https://github.com/ePi5131/aviutl_exedit_sdk
+* Common Library https://github.com/hebiiro/Common-Library
+
+# 作成者情報
+ 
+* 作成者 - 蛇色 (へびいろ)
+* GitHub - https://github.com/hebiiro
+* Twitter - https://twitter.com/io_hebiiro
