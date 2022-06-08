@@ -10,3 +10,4 @@
 #include "Common/MFC.h"
 #include "Common/WinUtility.h"
 #include "Common/FileUpdateChecker.h"
+#include "Common/SelectEasing.h"

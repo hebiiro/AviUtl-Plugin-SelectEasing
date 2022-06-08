@@ -51,6 +51,7 @@ public:
 	int m_pointRadius;
 	int m_segmentCount;
 	BOOL m_hideCursor;
+	BOOL m_immediately;
 
 	CEaseWindow();
 	virtual ~CEaseWindow();

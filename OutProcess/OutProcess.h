@@ -4,8 +4,6 @@
 
 //--------------------------------------------------------------------
 
-const UINT WM_SELECT_EASING_NOTIFY = ::RegisterWindowMessage(_T("WM_SELECT_EASING_NOTIFY"));
-
 const UINT_PTR TIMER_ID = 1;
 
 //--------------------------------------------------------------------
@@ -53,10 +51,10 @@ public:
 
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
+	virtual int Run();
 
 	afx_msg void OnSelectEasingNotify(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
-	virtual int Run();
 };
 
 //--------------------------------------------------------------------

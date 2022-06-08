@@ -52,6 +52,9 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="EaseWindow.h" />
+    <ClInclude Include="..\Common\SelectEasing.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

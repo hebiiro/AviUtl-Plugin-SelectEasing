@@ -10,7 +10,7 @@
 COutProcessApp theApp;
 
 BEGIN_MESSAGE_MAP(COutProcessApp, CWinApp)
-	ON_REGISTERED_THREAD_MESSAGE(WM_SELECT_EASING_NOTIFY, OnSelectEasingNotify)
+	ON_THREAD_MESSAGE(WM_SELECT_EASING_NOTIFY, OnSelectEasingNotify)
 END_MESSAGE_MAP()
 
 COutProcessApp::COutProcessApp() noexcept

@@ -4,10 +4,10 @@
 //---------------------------------------------------------------------
 //		フィルタ構造体のポインタを渡す関数
 //---------------------------------------------------------------------
-EXTERN_C FILTER_DLL __declspec(dllexport) * __stdcall GetFilterTable(void)
+EXTERN_C __declspec(dllexport) FILTER_DLL* CALLBACK GetFilterTable()
 {
 	static TCHAR name[] = _T("イージング簡単選択");
-	static TCHAR information[] = _T("イージング簡単選択 4.2.0 by 蛇色");
+	static TCHAR information[] = _T("イージング簡単選択 4.4.0 by 蛇色");
 
 	static FILTER_DLL filter =
 	{
@@ -62,7 +62,7 @@ BOOL func_exit(FILTER *fp)
 //---------------------------------------------------------------------
 BOOL func_proc(FILTER *fp, FILTER_PROC_INFO *fpip)
 {
-	MY_TRACE(_T("func_proc()\n"));
+//	MY_TRACE(_T("func_proc()\n"));
 
 	return theApp.proc(fp, fpip);
 }

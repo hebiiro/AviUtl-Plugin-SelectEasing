@@ -8,3 +8,4 @@
 #include "Common/Tracer.h"
 #include "Common/Hook.h"
 #include "Common/AviUtlInternal.h"
+#include "Common/SelectEasing.h"

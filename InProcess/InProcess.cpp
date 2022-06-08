@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "InProcess.h"
-
-const UINT WM_SELECT_EASING_NOTIFY = ::RegisterWindowMessage(_T("WM_SELECT_EASING_NOTIFY"));
+#include "InProcess_Hook.h"
 
 CInProcessApp theApp;
 
@@ -54,6 +53,10 @@ BOOL CInProcessApp::init(FILTER *fp)
 	if (!createSubProcess())
 		return FALSE;
 
+	m_auin.initExEditAddress();
+
+	initHook();
+
 	return TRUE;
 }
 
@@ -63,6 +66,8 @@ BOOL CInProcessApp::exit(FILTER *fp)
 
 	::CloseHandle(m_pi.hThread);
 	::CloseHandle(m_pi.hProcess);
+
+	termHook();
 
 	return TRUE;
 }
@@ -76,10 +81,18 @@ BOOL CInProcessApp::proc(FILTER *fp, FILTER_PROC_INFO *fpip)
 
 BOOL CInProcessApp::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, void *editp, FILTER *fp)
 {
-	MY_TRACE(_T("CInProcessApp::WndProc(0x%08X, 0x%08X, 0x%08X)\n"), message, wParam, lParam);
+//	MY_TRACE(_T("CInProcessApp::WndProc(0x%08X, 0x%08X, 0x%08X)\n"), message, wParam, lParam);
 
 	switch (message)
 	{
+	case WM_SELECT_EASING_UPDATE:
+		{
+			MY_TRACE(_T("CInProcessApp::WndProc(WM_SELECT_EASING_UPDATE, 0x%08X, 0x%08X)\n"), wParam, lParam);
+
+			update(wParam);
+
+			break;
+		}
 	case WM_WINDOWPOSCHANGING:
 		{
 			MY_TRACE(_T("CInProcessApp::WndProc(WM_WINDOWPOSCHANGING, 0x%08X, 0x%08X)\n"), wParam, lParam);
@@ -140,10 +153,54 @@ BOOL CInProcessApp::createSubProcess()
 		&si,            // Pointer to STARTUPINFO structure
 		&m_pi))         // Pointer to PROCESS_INFORMATION structur
 	{
-		MY_TRACE(_T("::CreateProcess() failed.\n"));
+		MY_TRACE(_T("::CreateProcess() が失敗しました\n"));
 
 		return FALSE;
 	}
 
 	return TRUE;
 }
+
+//--------------------------------------------------------------------
+
+// フックをセットする。
+void CInProcessApp::initHook()
+{
+	MY_TRACE(_T("CInProcessApp::initHook()\n"));
+
+	DWORD exedit = theApp.m_auin.GetExedit();
+	m_trackTable = (int*)(exedit + 0x14E900);
+	true_GetParamSmallExternal = hookCall(exedit + 0x2DBB1, hook_GetParamSmallExternal);
+}
+
+// フックを解除する。
+void CInProcessApp::termHook()
+{
+	MY_TRACE(_T("CInProcessApp::termHook()\n"));
+}
+
+//--------------------------------------------------------------------
+
+void CInProcessApp::update(int value)
+{
+	MY_TRACE(_T("update(%d)\n"), value);
+
+	if (!m_trackOffsets)
+		return;
+
+	m_trackTable[m_trackIndex] = value;
+
+	{
+		int offset = m_trackOffsets[0];
+		if (offset) m_trackTable[m_trackIndex + offset] = value;
+	}
+
+	{
+		int offset = m_trackOffsets[1];
+		if (offset) m_trackTable[m_trackIndex + offset] = value;
+	}
+
+	::SendMessage(m_auin.GetExeditWindow(), 0x111, 0x3EB, m_trackIndex | 0x00080000);
+}
+
+//--------------------------------------------------------------------

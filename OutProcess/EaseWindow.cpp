@@ -59,7 +59,7 @@ CEaseWindow::CEaseWindow()
 	m_pointRadius = 16;
 	m_segmentCount = 100;
 	m_hideCursor = FALSE;
-
+	m_immediately = FALSE;
 }
 
 CEaseWindow::~CEaseWindow()
@@ -314,7 +314,8 @@ BOOL CEaseWindow::PreCreateWindow(CREATESTRUCT& cs)
 {
 	MY_TRACE(_T("CEaseWindow::PreCreateWindow()\n"));
 
-	cs.style = WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_SYSMENU;
+	cs.style = WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_SYSMENU |
+		WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 	cs.dwExStyle = WS_EX_TOPMOST | WS_EX_NOACTIVATE | WS_EX_LAYERED;
 	cs.lpszClass = AfxRegisterWndClass(
 		CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
@@ -351,10 +352,7 @@ void CEaseWindow::OnClose()
 
 void CEaseWindow::OnPaint() 
 {
-	CPaintDC paintDC(this);
-
-	CUxDC dc(paintDC);
-	if (!dc.isValid()) return;
+	CDoubleBufferPaintDC dc(this);
 
 	Graphics g(dc);
 
@@ -461,6 +459,8 @@ void CEaseWindow::OnPaint()
 
 BOOL CEaseWindow::OnNcActivate(BOOL bActive)
 {
+	MY_TRACE(_T("CEaseWindow::OnNcActivate(%d)\n"), bActive);
+
 	return CWnd::OnNcActivate(bActive);
 }
 
@@ -537,6 +537,21 @@ void CEaseWindow::OnMouseMove(UINT nFlags, CPoint point)
 			Invalidate(FALSE);
 
 			outputEaseText();
+
+			if (m_immediately)
+			{
+				// フレーム画像を更新する。
+				int value = 0;
+				value += m_points[Points::first].x; value *= 100;
+				value += m_points[Points::first].y; value *= 100;
+				value += m_points[Points::second].x; value *= 100;
+				value += m_points[Points::second].y;
+				MY_TRACE_POINT(m_points[Points::first]);
+				MY_TRACE_POINT(m_points[Points::second]);
+				MY_TRACE_INT(value);
+
+				::SendMessage(theApp.m_mainProcessWindow, WM_SELECT_EASING_UPDATE, value, 0);
+			}
 		}
 	}
 	else

@@ -27,6 +27,7 @@ HRESULT CEaseWindow::saveEase(const MSXML2::IXMLDOMElementPtr& element)
 	setPrivateProfileInt(easeElement, L"hitDistance", m_hitDistance);
 	setPrivateProfileInt(easeElement, L"segmentCount", m_segmentCount);
 	setPrivateProfileBool(easeElement, L"hideCursor", m_hideCursor);
+	setPrivateProfileBool(easeElement, L"immediately", m_immediately);
 
 	{
 		MSXML2::IXMLDOMElementPtr windowElement = appendElement(easeElement, L"window");

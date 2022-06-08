@@ -30,6 +30,7 @@ HRESULT CEaseWindow::loadEase(const MSXML2::IXMLDOMElementPtr& element)
 		getPrivateProfileInt(easeElement, L"alpha", m_alpha);
 		getPrivateProfileInt(easeElement, L"segmentCount", m_segmentCount);
 		getPrivateProfileBool(easeElement, L"hideCursor", m_hideCursor);
+		getPrivateProfileBool(easeElement, L"immediately", m_immediately);
 
 		{
 			// <window> を取得する。

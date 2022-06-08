@@ -188,14 +188,19 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Common\AviUtlInternal.h" />
+    <ClInclude Include="..\..\Common\Hook.h" />
     <ClInclude Include="..\..\Common\Tracer.h" />
+    <ClInclude Include="..\Common\SelectEasing.h" />
     <ClInclude Include="InProcess.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="InProcess_Hook.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InProcess.cpp" />
     <ClCompile Include="InProcessFilter.cpp" />
+    <ClCompile Include="InProcess_Hook.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
