@@ -19,10 +19,10 @@ public:
 	~CInProcessApp();
 
 	BOOL dllMain(HINSTANCE instance, DWORD reason, LPVOID reserved);
-	BOOL init(FILTER *fp);
-	BOOL exit(FILTER *fp);
-	BOOL proc(FILTER *fp, FILTER_PROC_INFO *fpip);
-	BOOL WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, void *editp, FILTER *fp);
+	BOOL init(AviUtl::FilterPlugin* fp);
+	BOOL exit(AviUtl::FilterPlugin* fp);
+	BOOL proc(AviUtl::FilterPlugin* fp, AviUtl::FilterProcInfo* fpip);
+	BOOL WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, AviUtl::EditHandle* editp, AviUtl::FilterPlugin* fp);
 
 	BOOL createSubProcess();
 

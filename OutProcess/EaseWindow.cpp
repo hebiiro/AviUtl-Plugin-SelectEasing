@@ -233,7 +233,7 @@ void CEaseWindow::show(HWND numberWindow, HWND easingWindow)
 	{
 		// クライアントサイズを設定する。
 		CRect rc(0, 0, m_windowSize.cx, m_windowSize.cy);
-		getWindowRectFromClientRect(GetSafeHwnd(), &rc);
+		clientToWindow(GetSafeHwnd(), &rc);
 		w = rc.Width();
 		h = rc.Height();
 	}
@@ -369,7 +369,23 @@ void CEaseWindow::OnPaint()
 	CRect rc; getWorkarea(&rc);
 	CRect rcPaint = rc;
 	rcPaint.right--; rcPaint.bottom--;
+#if 0
+	{
+		CRect rc; GetClientRect(&rc);
 
+		Gdiplus::FontFamily  fontFamily(L"Segoe UI");
+		Gdiplus::Font        font(&fontFamily, 24, FontStyleRegular, UnitPixel);
+		Gdiplus::SolidBrush  brush(Color(255, 0, 0, 255));
+
+		StringFormat format;
+		format.SetAlignment(Gdiplus::StringAlignmentFar);
+		format.SetLineAlignment(Gdiplus::StringAlignmentNear);
+
+		LPCWSTR text = L"確定↑";
+
+		g.DrawString(text, ::lstrlenW(text), &font, MyRectF(rc), &format, &brush);
+	}
+#endif
 	MyPoint start(LPToClient(CPoint(Position::startBase, Position::startBase), &rcPaint));
 	MyPoint end(LPToClient(CPoint(Position::endBase, Position::endBase), &rcPaint));
 	MyPoint first(LPToClient(m_points[Points::first], &rcPaint));
@@ -500,6 +516,8 @@ void CEaseWindow::OnLButtonUp(UINT nFlags, CPoint point)
 void CEaseWindow::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	MY_TRACE(_T("CEaseWindow::OnLButtonDblClk(0x%08X, %d, %d)\n"), nFlags, point.x, point.y);
+
+	sendNumber();
 
 	CWnd::OnLButtonDblClk(nFlags, point);
 }

@@ -44,7 +44,7 @@ BOOL CInProcessApp::dllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 	return TRUE;
 }
 
-BOOL CInProcessApp::init(FILTER *fp)
+BOOL CInProcessApp::init(AviUtl::FilterPlugin* fp)
 {
 	MY_TRACE(_T("CInProcessApp::init()\n"));
 
@@ -60,7 +60,7 @@ BOOL CInProcessApp::init(FILTER *fp)
 	return TRUE;
 }
 
-BOOL CInProcessApp::exit(FILTER *fp)
+BOOL CInProcessApp::exit(AviUtl::FilterPlugin* fp)
 {
 	MY_TRACE(_T("CInProcessApp::exit()\n"));
 
@@ -72,14 +72,14 @@ BOOL CInProcessApp::exit(FILTER *fp)
 	return TRUE;
 }
 
-BOOL CInProcessApp::proc(FILTER *fp, FILTER_PROC_INFO *fpip)
+BOOL CInProcessApp::proc(AviUtl::FilterPlugin* fp, AviUtl::FilterProcInfo* fpip)
 {
 	MY_TRACE(_T("CInProcessApp::proc()\n"));
 
 	return TRUE;
 }
 
-BOOL CInProcessApp::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, void *editp, FILTER *fp)
+BOOL CInProcessApp::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, AviUtl::EditHandle* editp, AviUtl::FilterPlugin* fp)
 {
 //	MY_TRACE(_T("CInProcessApp::WndProc(0x%08X, 0x%08X, 0x%08X)\n"), message, wParam, lParam);
 
@@ -98,20 +98,6 @@ BOOL CInProcessApp::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 			MY_TRACE(_T("CInProcessApp::WndProc(WM_WINDOWPOSCHANGING, 0x%08X, 0x%08X)\n"), wParam, lParam);
 
 			::PostThreadMessage(m_pi.dwThreadId, WM_SELECT_EASING_NOTIFY, 0, 0);
-
-			break;
-		}
-	case WM_FILTER_CHANGE_EDIT:
-		{
-			MY_TRACE(_T("CInProcessApp::WndProc(WM_FILTER_CHANGE_EDIT)\n"));
-
-			if (fp->exfunc->is_editing(editp) != TRUE) break;
-
-			break;
-		}
-	case WM_FILTER_CHANGE_WINDOW:
-		{
-			MY_TRACE(_T("CInProcessApp::WndProc(WM_FILTER_CHANGE_WINDOW)\n"));
 
 			break;
 		}
@@ -168,7 +154,7 @@ void CInProcessApp::initHook()
 {
 	MY_TRACE(_T("CInProcessApp::initHook()\n"));
 
-	DWORD exedit = theApp.m_auin.GetExedit();
+	DWORD exedit = theApp.m_auin.GetExEdit();
 	m_trackTable = (int*)(exedit + 0x14E900);
 	true_GetParamSmallExternal = hookCall(exedit + 0x2DBB1, hook_GetParamSmallExternal);
 }
@@ -200,7 +186,7 @@ void CInProcessApp::update(int value)
 		if (offset) m_trackTable[m_trackIndex + offset] = value;
 	}
 
-	::SendMessage(m_auin.GetExeditWindow(), 0x111, 0x3EB, m_trackIndex | 0x00080000);
+	::SendMessage(m_auin.GetExEditWindow(), 0x111, 0x3EB, m_trackIndex | 0x00080000);
 }
 
 //--------------------------------------------------------------------

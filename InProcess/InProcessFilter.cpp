@@ -1,84 +1,60 @@
 ﻿#include "pch.h"
 #include "InProcess.h"
 
-//---------------------------------------------------------------------
-//		フィルタ構造体のポインタを渡す関数
-//---------------------------------------------------------------------
-EXTERN_C __declspec(dllexport) FILTER_DLL* CALLBACK GetFilterTable()
-{
-	static TCHAR name[] = _T("イージング簡単選択");
-	static TCHAR information[] = _T("イージング簡単選択 4.4.0 by 蛇色");
+//--------------------------------------------------------------------
 
-	static FILTER_DLL filter =
-	{
-	//	FILTER_FLAG_NO_CONFIG |
-		FILTER_FLAG_ALWAYS_ACTIVE |
-		FILTER_FLAG_DISP_FILTER |
-		FILTER_FLAG_EX_INFORMATION,
-		0, 0,
-		name,
-		NULL, NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL,
-		func_proc,
-		func_init,
-		func_exit,
-		NULL,
-		func_WndProc,
-		NULL, NULL,
-		NULL,
-		NULL,
-		information,
-		NULL, NULL,
-		NULL, NULL, NULL, NULL,
-		NULL,
-	};
-
-	return &filter;
-}
-
-//---------------------------------------------------------------------
-//		初期化
-//---------------------------------------------------------------------
-
-BOOL func_init(FILTER *fp)
+BOOL func_init(AviUtl::FilterPlugin* fp)
 {
 	MY_TRACE(_T("func_init()\n"));
 
 	return theApp.init(fp);
 }
 
-//---------------------------------------------------------------------
-//		終了
-//---------------------------------------------------------------------
-BOOL func_exit(FILTER *fp)
+BOOL func_exit(AviUtl::FilterPlugin* fp)
 {
 	MY_TRACE(_T("func_exit()\n"));
 
 	return theApp.exit(fp);
 }
 
-//---------------------------------------------------------------------
-//		フィルタ関数
-//---------------------------------------------------------------------
-BOOL func_proc(FILTER *fp, FILTER_PROC_INFO *fpip)
+BOOL func_proc(AviUtl::FilterPlugin* fp, AviUtl::FilterProcInfo* fpip)
 {
 //	MY_TRACE(_T("func_proc()\n"));
 
 	return theApp.proc(fp, fpip);
 }
 
-//---------------------------------------------------------------------
-//		WndProc
-//---------------------------------------------------------------------
-BOOL func_WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, void *editp, FILTER *fp)
+BOOL func_WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, AviUtl::EditHandle* editp, AviUtl::FilterPlugin* fp)
 {
 	return theApp.WndProc(hwnd, message, wParam, lParam, editp, fp);
 }
 
-//---------------------------------------------------------------------
-//		DllMain
-//---------------------------------------------------------------------
 BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
 	return theApp.dllMain(instance, reason, reserved);
 }
+
+EXTERN_C AviUtl::FilterPluginDLL* CALLBACK GetFilterTable()
+{
+	LPCSTR name = "イージング簡単選択";
+	LPCSTR information = "イージング簡単選択 4.5.0 by 蛇色";
+
+	static AviUtl::FilterPluginDLL filter =
+	{
+		.flag =
+			AviUtl::detail::FilterPluginFlag::AlwaysActive |
+			AviUtl::detail::FilterPluginFlag::DispFilter |
+//			AviUtl::detail::FilterPluginFlag::WindowThickFrame |
+//			AviUtl::detail::FilterPluginFlag::WindowSize |
+			AviUtl::detail::FilterPluginFlag::ExInformation,
+		.name = name,
+		.func_init = func_init,
+		.func_exit = func_exit,
+		.func_WndProc = func_WndProc,
+		.information = information,
+	};
+
+	return &filter;
+}
+
+//--------------------------------------------------------------------

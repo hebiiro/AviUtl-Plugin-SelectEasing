@@ -48,6 +48,50 @@ void CMainFrame::loadImage()
 
 	switch (m_imageVersion)
 	{
+	case 3:
+		{
+			::PathAppend(path, _T("easing3.png"));
+			MY_TRACE_TSTR(path);
+
+			m_image.Load(path);
+
+			if (!m_image.IsNull())
+			{
+				int w = m_image.GetWidth() * m_scale / 100;
+				int h = m_image.GetHeight() * m_scale / 100;
+
+				SetWindowPos(0, 0, 0, w, h,
+					SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+			}
+
+			m_parts.resize(41);
+
+			// (1) の位置。
+			int x = 20;
+			int y = 100;
+
+			setRect(1, x, y);
+
+			for (int i = 0; i < 5; i++)
+			{
+				y += 160;
+
+				// (2) と (6) の位置。
+				int x1 = 20;
+				int x2 = 735;
+
+				for (int j = 0; j < 4; j++)
+				{
+					setRect((i * 8) + j + 2 + 0, x1, y);
+					setRect((i * 8) + j + 2 + 4, x2, y);
+
+					x1 += 175;
+					x2 += 175;
+				}
+			}
+
+			break;
+		}
 	case 2:
 		{
 			::PathAppend(path, _T("easing2.png"));
@@ -141,6 +185,17 @@ void CMainFrame::setRect(int number, int _x, int _y)
 
 	switch (m_imageVersion)
 	{
+	case 3:
+		{
+			int x = ::MulDiv(_x, m_scale, 100);
+			int y = ::MulDiv(_y, m_scale, 100);
+			int w = ::MulDiv(_x + 160, m_scale, 100);
+			int h = ::MulDiv(_y + 120, m_scale, 100);
+
+			m_parts[number - 1].SetRect(x, y, w, h);
+
+			break;
+		}
 	case 2:
 		{
 			int x = ::MulDiv(_x, m_scale, 100);
